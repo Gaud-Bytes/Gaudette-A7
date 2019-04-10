@@ -1,0 +1,181 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">        
+        
+        <style>
+            .unselected
+            {
+        
+                background-color: black;
+                border-color: white;
+                height: 4rem;
+            }
+            
+            .selectedWrong
+            {
+                background-color: red;
+                border-color: white;
+                height: 4rem;
+            }
+            
+            .selectedTreasure
+            {
+                background-color: green;
+                border-color: white;
+                height: 4rem;
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div class="container">
+            
+            
+            <h4>Treasure Hunt</h4>
+            <div class="row" id="boxList"></div>
+            <p id = "guess"></p>
+            
+            
+        </div>
+        
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>        
+        
+        <!--put your modal dialogs here...-->
+        <div id='playAgain' class="modal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header bg-dark text-light">
+                <h5 class="modal-title">Play Again?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>Would you like to play again?</p>
+              </div>
+              <div class="modal-footer">
+                <button id='yes' type="button" class="btn btn-primary">Yes</button>
+                <button id = 'no' type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+              </div>
+            </div>
+          </div>
+        </div>                
+        
+        <script>
+        /* global $ */
+        $(document).ready(function() 
+        {
+            // model ....
+            let model = {};
+
+            function initializeModel()
+            {
+                model.guesses = 0;
+                model.cardSize = 12;
+                model.rand = Math.floor(Math.random() * model.cardSize);
+                
+                model.gameOver = false;
+                
+                model.cards = [];
+                
+                for(let i = 0; i < model.cardSize; i++)
+                {
+                    model.cards.push({"hasTreasure": model.rand == i, "flipped": false });
+                }
+
+            }
+            
+            // view...
+            function updateView()
+            {
+                $('#boxList').empty(); 
+                console.log("Updating Boxes...");
+                for (let i = 0; i < model.cardSize; i++) 
+                {
+                    let item = $("<div></div>");
+                    item.attr("id", i);
+                    item.addClass("col-6");
+                    item.addClass("card");
+                    
+                    if(model.cards[i].flipped && model.cards[i].hasTreasure)
+                    {
+                        item.removeClass("unselected");
+                        item.addClass("selectedTreasure");
+                    }
+                    else if(model.cards[i].flipped && !model.cards[i].hasTreasure)
+                    {
+                        item.removeClass("unselected");
+                        item.addClass("selectedWrong");
+                    }
+                    else if(!model.cards[i].flipped)
+                        item.addClass("unselected");
+                        
+                    
+                    $('#boxList').append(item);
+                   
+                }
+                console.log("...Boxes added");
+                $('#guess').empty();
+                $('#guess').append("Guesses: ");
+                $('#guess').append(model.guesses);
+                
+                if(model.gameOver)
+                {
+                    $('#playAgain').modal('show');
+                    console.log("model Play Again Pop up");
+                }
+                    
+                
+                
+            }            
+            
+            $(document).on("click",".card",function() 
+            {
+                if(!model.gameOver)
+                {
+                    console.log("Box " + $(this).attr("id") + " Has been Clicked");
+                    model.guesses++;
+                    console.log("Guesses: " + model.guesses);
+                    
+                    if(model.cards[$(this).attr("id")].hasTreasure)
+                    {
+                        model.cards[$(this).attr("id")].flipped = true;
+                        console.log("treasure found");
+                        model.gameOver = true;
+                    }
+                    else
+                    {
+                        model.cards[$(this).attr("id")].flipped = true;
+                        console.log("404 no treasure found");
+                    }
+                    updateView();
+                }
+                else
+                    console.log("Game is over screen wont change");
+                
+
+            });
+            
+
+            $('#yes').click(function() 
+            {
+                $('#playAgain').modal('hide');
+                initializeModel();
+                updateView();
+            });
+            
+            $('#no').click(function() 
+            {
+                $('#playAgain').modal('hide');
+            });
+            
+            // run...
+            initializeModel();
+            updateView();
+        });
+        
+        </script>
+    </body>
+</html>
